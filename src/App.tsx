@@ -1,15 +1,50 @@
 import { Chess } from "chess.js";
 import "./App.css";
 import { Chessboard } from "react-chessboard";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
+import stockFishWorker from "./stockfish-nnue-16?worker";
+
+function useStockFish() {
+  const engine = useMemo(() => new stockFishWorker(), []);
+  useEffect(() => {
+    console.log(engine);
+
+    engine.onmessage = onEngineMessage;
+    console.log(engine);
+    engine.postMessage("uci");
+
+    function onEngineMessage(ev: MessageEvent) {
+      console.log("$", ev.data);
+    }
+
+    return () => {
+      engine.postMessage("quit");
+      void (engine.onmessage = null);
+    };
+  }, [engine]);
+
+  const findBestMove = useCallback(
+    (fen: string, depth = 8) => {
+      console.log(engine);
+      engine.postMessage(`position fen ${fen}`);
+      engine.postMessage(`go depth ${depth}`);
+    },
+    [engine]
+  );
+
+  return { findBestMove };
+}
 
 function App() {
   const game = useMemo(() => new Chess(), []);
+  const { findBestMove } = useStockFish();
 
   const [gamePosition, setGamePosition] = useState(game.fen());
 
   function makeRandomMove() {
+    findBestMove(game.fen(), 10);
+
     const possibleMoves = game.moves();
     if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0)
       return;
