@@ -1,50 +1,66 @@
 import { Chess } from "chess.js";
 import "./App.css";
 import { Chessboard } from "react-chessboard";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
 import stockFishWorker from "./stockfish-nnue-16?worker";
 
-function useStockFish() {
-  const engine = useMemo(() => new stockFishWorker(), []);
-  useEffect(() => {
-    console.log(engine);
 
-    engine.onmessage = onEngineMessage;
-    console.log(engine);
-    engine.postMessage("uci");
+class Engine {
+  stockfish: Worker;
+  onMessage: (callback: (m: { bestMove: string }) => void) => void;
+  constructor() {
+    this.stockfish = new stockFishWorker();
+    this.onMessage = (callback) => {
+      this.stockfish.addEventListener("message", (e) => {
+        console.log("$", e.data);
+        const bestMove = e.data?.match(/bestmove\s+(\S+)/)?.[1];
 
-    function onEngineMessage(ev: MessageEvent) {
-      console.log("$", ev.data);
-    }
-
-    return () => {
-      engine.postMessage("quit");
-      void (engine.onmessage = null);
+        callback({ bestMove });
+      });
     };
-  }, [engine]);
+    // Init engine
+    this.stockfish.postMessage("uci");
+    this.stockfish.postMessage("isready");
+  }
 
-  const findBestMove = useCallback(
-    (fen: string, depth = 8) => {
-      console.log(engine);
-      engine.postMessage(`position fen ${fen}`);
-      engine.postMessage(`go depth ${depth}`);
-    },
-    [engine]
-  );
-
-  return { findBestMove };
+  evaluatePosition(fen: string, depth: number) {
+    this.stockfish.postMessage(`position fen ${fen}`);
+    this.stockfish.postMessage(`go depth ${depth}`);
+  }
+  stop() {
+    this.stockfish.postMessage("stop"); // Run when changing positions
+  }
+  quit() {
+    this.stockfish.postMessage("quit"); // Good to run this before unmounting.
+  }
 }
 
 function App() {
+  const engine = useMemo(() => new Engine(), []);
   const game = useMemo(() => new Chess(), []);
-  const { findBestMove } = useStockFish();
 
   const [gamePosition, setGamePosition] = useState(game.fen());
 
-  function makeRandomMove() {
-    findBestMove(game.fen(), 10);
+  function findBestMove() {
+    engine.evaluatePosition(game.fen(), 8);
+    engine.onMessage((message: { bestMove: string }) => {
+      console.log({ message });
+      const bestMove = message?.bestMove ?? null;
 
+      if (bestMove) {
+        game.move({
+          from: bestMove.substring(0, 2),
+          to: bestMove.substring(2, 4),
+          promotion: bestMove.substring(4, 5),
+        });
+
+        setGamePosition(game.fen());
+      }
+    });
+  }
+
+  function makeRandomMove() {
     const possibleMoves = game.moves();
     if (game.isGameOver() || game.isDraw() || possibleMoves.length === 0)
       return;
@@ -77,7 +93,8 @@ function App() {
     }
 
     // Have the computer make a move
-    makeRandomMove();
+    findBestMove();
+    // makeRandomMove();
 
     return true;
   }
