@@ -121,8 +121,8 @@ class Engine {
 }
 
 function App() {
-  const [opponentElo, setOpponentElo] = useState(1350);
-  const [playerFinElo, setPlayerFinElo] = useState();
+  const [opponentElo] = useState(1350);
+  const [playerFinElo] = useState();
   const opponentEngine = useMemo(
     () => new Engine("opponent", true, opponentElo),
     []
@@ -131,7 +131,7 @@ function App() {
     () => new Engine("player", false, playerFinElo),
     []
   );
-  const [playerColor, setPlayerColor] = useState<Color>("w");
+  const [playerColor] = useState<Color>("w");
   const game = useChessStore(aChessStore);
   const isPlayerTurn = game.turn === playerColor;
 
