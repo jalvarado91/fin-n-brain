@@ -252,9 +252,9 @@ function App() {
     console.log("play again");
     Promise.all([opponentEngine.newGame(), playerEngine.newGame()]).then(() => {
       console.log("engines ready for new game");
-      aChessStore.reset();
-      setBestPlayerMove(undefined);
       setActiveScreen("playing");
+      setBestPlayerMove(undefined);
+      aChessStore.reset();
     });
   }
 
@@ -265,8 +265,8 @@ function App() {
     Promise.all([opponentEngine.newGame(), playerEngine.newGame()]).then(() => {
       console.log("engines ready for new game");
       aChessStore.reset();
-      setBestPlayerMove(undefined);
       setActiveScreen("home");
+      setBestPlayerMove(undefined);
     });
   }
 
