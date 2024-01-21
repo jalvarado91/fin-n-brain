@@ -11,7 +11,9 @@ export default {
     extend: {},
   },
   plugins: [
-    typography, forms
+    typography, forms({
+      strategy: 'class'
+    })
   ],
 }
 

@@ -140,7 +140,7 @@ class Engine {
 }
 
 function App() {
-  const [opponentElo, setOpponentElo] = useState(1000);
+  const [opponentElo, setOpponentElo] = useState(1350);
   const [partnerElo, setPartnerElo] = useState(3190);
   const opponentEngine = useMemo(
     () => new Engine("opponent", false, opponentElo),
@@ -152,6 +152,7 @@ function App() {
   );
   const [showSquare, setShowSquare] = useState(false);
   const [enableBlunderChance, setEnableBlunderChance] = useState(false);
+  const [blunderChance, setBlunderChance] = useState(5);
   const [playerColor, setPlayerColor] = useState<Color>("w");
   const game = useChessStore(aChessStore);
   const isPlayerTurn = game.turn === playerColor;
@@ -180,7 +181,7 @@ function App() {
 
     if (activeScreen === "playing" && !isPlayerTurn) {
       if (enableBlunderChance) {
-        const isRandom = Math.random() < 1 / 5;
+        const isRandom = Math.random() < 1 / blunderChance;
 
         if (isRandom) {
           makeRandomOpponentMove();
@@ -204,6 +205,7 @@ function App() {
     isPlayerTurn,
     opponentEngine,
     playerEngine,
+    blunderChance,
   ]);
 
   const gameOverDetails = game.isGameOver && {
@@ -353,7 +355,7 @@ function App() {
                       value={opponentElo}
                       onChange={(e) => setOpponentElo(Number(e.target.value))}
                       type="number"
-                      className="mt-1 block w-full bg-zinc-800 rounded-md border-zinc-800 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50"
+                      className="form-input mt-1 block w-full bg-zinc-800 rounded-md border-zinc-800 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50"
                       placeholder=""
                     />
                   </label>
@@ -365,7 +367,7 @@ function App() {
                       value={partnerElo}
                       onChange={(e) => setPartnerElo(Number(e.target.value))}
                       type="email"
-                      className="mt-1 block w-full bg-zinc-800 rounded-md border-zinc-800 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50"
+                      className="form-input mt-1 block w-full bg-zinc-800 rounded-md border-zinc-800 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50"
                       placeholder="3500+"
                     />
                   </label>
@@ -378,7 +380,7 @@ function App() {
                   <label className="inline-flex items-center">
                     <input
                       type="checkbox"
-                      className="rounded h-4 w-4 border-gray-300 text-sky-600 shadow-sm focus:border-sky-300 focus:ring focus:ring-offset-0 focus:ring-sky-200 focus:ring-opacity-50"
+                      className="form-checkbox rounded h-4 w-4 border-gray-300 text-sky-600 shadow-sm focus:border-sky-300 focus:ring focus:ring-offset-0 focus:ring-sky-200 focus:ring-opacity-50"
                       checked={showSquare}
                       onChange={(ev) => setShowSquare(ev.target.checked)}
                     />
@@ -396,7 +398,7 @@ function App() {
                   <label className="inline-flex items-center">
                     <input
                       type="checkbox"
-                      className="rounded h-4 w-4 border-gray-300 text-sky-600 shadow-sm focus:border-sky-300 focus:ring focus:ring-offset-0 focus:ring-sky-200 focus:ring-opacity-50"
+                      className="form-checkbox rounded h-4 w-4 border-gray-300 text-sky-600 shadow-sm focus:border-sky-300 focus:ring focus:ring-offset-0 focus:ring-sky-200 focus:ring-opacity-50"
                       checked={enableBlunderChance}
                       onChange={(ev) =>
                         setEnableBlunderChance(ev.target.checked)
@@ -408,8 +410,14 @@ function App() {
                   </label>
                 </div>
                 <div className="text-xs mt-2 opacity-80">
-                  If enabled, opponent will have a 1 in 5 chance of making a
-                  blunder
+                  If enabled, opponent will have a 1 in{" "}
+                  <input
+                    className="inline-block w-7 bg-zinc-800 border-zinc-800 text-center py-1 font-bold disabled:opacity-30 disabled:pointer-events-none"
+                    value={blunderChance}
+                    disabled={!enableBlunderChance}
+                    onChange={(ev) => setBlunderChance(Number(ev.target.value))}
+                  />{" "}
+                  chance of making a blunder
                 </div>
                 <br />
                 <div className=" space-y-4">
