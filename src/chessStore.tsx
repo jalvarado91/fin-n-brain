@@ -32,6 +32,11 @@ export class ChessStore {
     this.emitChange();
     return m;
   }
+  reset() {
+    this.chess.reset();
+    this.projection = getProjection(this.chess);
+    this.emitChange();
+  }
   subscribe(listener: () => void) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -58,6 +63,7 @@ function getProjection(game: Chess) {
     isThreefoldRepetition: game.isThreefoldRepetition(),
     moveNumber: game.moveNumber(),
     moves: game.moves(),
+    movesVerbose: game.moves({ verbose: true }),
     pgn: game.pgn(),
     pgnFormat: game.pgn({
       newline: "<br />",
