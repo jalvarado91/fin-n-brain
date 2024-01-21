@@ -292,8 +292,8 @@ function App() {
   }
 
   return (
-    <div className="container mx-auto w-full h-screen  grid grid-cols-8">
-      <div className="col-span-5 w-full h-full">
+    <div className="container mx-auto w-full h-screen grid md:grid-cols-8">
+      <div className="md:col-span-5 px-4 md:px-0 w-full h-full">
         <div className="py-3 text-white">
           Stockfish {opponentElo ? <span>({opponentElo})</span> : null}
         </div>
@@ -327,7 +327,7 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="col-span-3 text-zinc-200 px-4 py-4 max-h-[min(100vh,_1120px)]">
+      <div className="md:col-span-3 text-zinc-200 px-4 py-4 max-h-[min(100vh,_1120px)]">
         <div className="bg-zinc-700 shadow-inner shadow-gray-500/5 flex flex-col max-h-full h-full rounded">
           {activeScreen === "home" ? (
             <div className="flex flex-col max-h-full h-full ">
